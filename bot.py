@@ -29,6 +29,63 @@ from config import (
 from database import Database
 from models import Order
 
+#!/usr/bin/env python3
+"""
+Jersey Management Telegram Bot
+Main application file with ConversationHandler for order flow
+"""
+
+import logging
+from datetime import datetime
+from functools import wraps
+from typing import Dict, Any
+import threading
+import os
+import time
+
+# 🌟 FIX FOR RENDER: Simple HTTP server for health checks
+from http.server import HTTPServer, BaseHTTPRequestHandler
+
+class HealthHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.send_header('Content-type', 'text/html')
+        self.end_headers()
+        self.wfile.write(b'Jersey Bot is running!')
+    
+    def log_message(self, format, *args):
+        # Suppress log messages
+        pass
+
+def run_health_server():
+    """Run a simple HTTP server on the required port"""
+    port = int(os.environ.get('PORT', 10000))
+    server = HTTPServer(('0.0.0.0', port), HealthHandler)
+    print(f"🌐 Health check server running on port {port}")
+    server.serve_forever()
+
+# Start health server in background thread
+health_thread = threading.Thread(target=run_health_server, daemon=True)
+health_thread.start()
+print("✅ Health check server started")
+
+# Give it a moment to start
+time.sleep(1)
+
+# Your existing imports...
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram.ext import (
+    Application,
+    CommandHandler,
+    CallbackQueryHandler,
+    MessageHandler,
+    filters,
+    ConversationHandler,
+    ContextTypes
+)
+
+# Rest of your code continues exactly as before...
+
 # Enable logging
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
